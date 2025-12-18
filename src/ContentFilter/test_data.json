@@ -1,0 +1,48 @@
+[
+  {"id": 1, "text": "Пример короткого текста для обработки"},
+  {"id": 2, "text": "This is an English text example with punctuation!"},
+  {"id": 3, "text": "Тест с числами 123456 и символами #@!*"},
+  {"id": 4, "text": ""},
+  {"id": 5, "text": "Текст с эмодзи 😃🔥🎉"},
+  {
+    "id": 6,
+    "text": "Очень длинный текст Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  },
+  {"id": 7, "text": "Тест с разными языками: русский, English, 中文, العربية"},
+  {"id": 8, "text": "Спецсимволы: ~!@#$%^&*()_+{}|:\"<>?"},
+  {"id": 9, "text": "HTML-теги <div>тест</div>"},
+  {
+    "id": 10,
+    "text": "Python code example:\ndef foo():\n    return 42"
+  },
+  {
+    "id": 11,
+    "text": "Текст с переносами строк\nи табуляцией\tдля теста"
+  },
+  {"id": 12, "text": "Смайлики и символы 😎👍💡"},
+  {"id": 13, "text": "Цифры и математика 1+1=2, 3*7=21"},
+  {"id": 14, "text": "Смешанный текст: English русский текст 123"},
+  {
+    "id": 15,
+    "text": "Очень длинный текст для проверки пределов модели. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение. Тестовое предложение."
+  },
+  {
+    "id": 16,
+    "text": "Тест с кавычками 'одинарные' и \"двойные\""
+  },
+  {"id": 17, "text": "Тест с апострофами и дефисами: l'année, co-operate"},
+  {"id": 18, "text": "Специальные символы: © ® ™ ✓ ∆"},
+  {
+    "id": 19,
+    "text": "Текст с HTML и скриптами: <script>alert('test');</script>"
+  },
+  {"id": 20, "text": "Unicode тест: 𝔘𝔫𝔦𝔠𝔬𝔡𝔢, 𝔗𝔢𝔰𝔱"},
+  {"id": 21, "text": "Смешанный текст с числами и символами: abc123!@#"},
+  {"id": 22, "text": "Текст на другом языке: 日本語のテキスト для теста"},
+  {"id": 23, "text": "Тест с кириллицей и латиницей: пример text Example"},
+  {"id": 24, "text": "Очень короткий: a"},
+  {
+    "id": 25,
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+]
