@@ -1,19 +1,35 @@
 from fastapi import FastAPI
 import uvicorn
 
-from models.TextRequest import TextRequest
-from models.TextResponse import TextResponse
+from models import TextStatusRequest
+from models import TextStatusResponse
+from models import TextRequest
+from models import TextResponse
 
-
-# Создаем экземпляр приложения FastAPI
 app = FastAPI(title="MIN Messager API", version="1.0.0")
 
-@app.post("/check/", response_model=TextResponse, summary="Обработка текста")
+@app.post("/check/", summary="Обработка текста")
 async def process_text(request: TextRequest):
     """
     Обрабатывает переданный текст и возвращает результат обработки.
     
     - **text**: Текст для обработки (минимум 1 символ)
+    - **id**: Уникальный числовой идентификатор (больше 0)
+    """
+    pass
+
+@app.get("/status/", response_model=TextStatusResponse, summary="Обработка текста")
+async def get_status(request: TextStatusRequest):
+    """
+    Обрабатывает переданный текст и возвращает результат обработки.
+    - **id**: Уникальный числовой идентификатор (больше 0)
+    """
+    pass
+
+@app.get("/verdict/", response_model=TextResponse, summary="Обработка текста")
+async def get_verdict(request: TextStatusRequest):
+    """
+    Возвращает вердикт.
     - **id**: Уникальный числовой идентификатор (больше 0)
     """
     pass
