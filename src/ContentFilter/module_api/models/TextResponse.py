@@ -1,5 +1,8 @@
+from typing import Literal
 from pydantic import BaseModel
 
+VERDICT = Literal["OK", "SPAM", "TOXIC"]
+
 class TextResponse(BaseModel):
-    id: int
-    text: str
+    id: str
+    verdict: VERDICT
