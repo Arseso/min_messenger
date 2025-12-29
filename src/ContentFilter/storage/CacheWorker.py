@@ -1,4 +1,4 @@
-from module_api import TextRequest
+from module_api import TextResponse
 from pydantic_core import from_json
 
 from redis import Redis
@@ -13,7 +13,7 @@ class CacheWorker:
             db= 0
         )
         
-    def append(self, obj: TextRequest):
+    def append(self, obj: TextResponse):
         status = self.redis.append(obj.id, obj.model_dump_json())
         if not status:
             raise Exception("Error while adding an object to queue")
@@ -23,19 +23,19 @@ class CacheWorker:
             return True
         return False
     
-    def get(self, key: str) -> TextRequest | None:
+    def get(self, key: str) -> TextResponse | None:
         value = self.redis.get(key)
         if not value:
             return None
         self.redis.delete(key)
-        return TextRequest.model_validate(from_json(value))
+        return TextResponse.model_validate(from_json(value))
     
 
 if __name__ == "__main__":
     from env import Settings
 
     redis = CacheWorker("localhost", Settings.REDIS_PORT, Settings.REDIS_PWD)
-    value = TextRequest(id= 'aaaddd', text = "lol")
+    value = TextResponse(id= 'aaaddd', verdict = "SPAM")
 
     assert redis.append(value) == None
     assert redis.has_key(value.id) == True
