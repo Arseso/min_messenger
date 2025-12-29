@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 import uvicorn
 
-from models import TextStatusRequest
-from models import TextStatusResponse
-from models import TextRequest
-from models import TextResponse
+from module_api.models import TextStatusRequest
+from module_api.models import TextStatusResponse
+from module_api.models import TextRequest
+from module_api.models import TextResponse
 
 app = FastAPI(title="MIN Messager API", version="1.0.0")
 
