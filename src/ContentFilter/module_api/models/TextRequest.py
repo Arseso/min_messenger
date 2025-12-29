@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 class TextRequest(BaseModel):
     text: str = Field(..., min_length=1, description="Текст для проверки")
-    id: str = Field(..., gt=0, description="Уникальный идентификатор")
+    id: str = Field(..., min_length=1, description="Уникальный идентификатор")
 
     # Опционально: пример данных для документации
     class Config:
