@@ -5,34 +5,48 @@ from module_api.models import TextStatusRequest
 from module_api.models import TextStatusResponse
 from module_api.models import TextRequest
 from module_api.models import TextResponse
+from module_api.models import Error
+from storage import *
+from env import Settings
 
 app = FastAPI(title="MIN Messager API", version="1.0.0")
+queue = QueueWorker(Settings.REDIS_HOST, Settings.REDIS_PORT, Settings.REDIS_PWD)
+cache = CacheWorker(Settings.REDIS_HOST, Settings.REDIS_PORT, Settings.REDIS_PWD)
 
-@app.post("/check/", summary="Обработка текста")
+
+@app.post("/check/", summary="Отправка сообщения на проверку")
 async def process_text(request: TextRequest):
-    """
-    Обрабатывает переданный текст и возвращает результат обработки.
+    try:
+        if not queue.append(request):
+            return Error(error_message="Something went wrong")
+        else: 
+            return TextStatusResponse(id = request.id, status="working")
+    except Exception as e:
+        return Error(error_message=str(e))
     
-    - **text**: Текст для обработки (минимум 1 символ)
-    - **id**: Уникальный числовой идентификатор (больше 0)
-    """
-    pass
 
-@app.get("/status/", response_model=TextStatusResponse, summary="Обработка текста")
+@app.get("/status/", response_model=TextStatusResponse, summary="Проверка статуса работы над сообщением")
 async def get_status(request: TextStatusRequest):
-    """
-    Обрабатывает переданный текст и возвращает результат обработки.
-    - **id**: Уникальный числовой идентификатор (больше 0)
-    """
-    pass
+    try:
+        status = ""
+        if not cache.has_key(request.id):
+            status = "working"
+        else: 
+            status = "ready"
+        return TextStatusResponse(id = request.id, status = status)
+    except Exception as e:
+        return Error(error_message=str(e))
 
-@app.get("/verdict/", response_model=TextResponse, summary="Обработка текста")
+@app.get("/verdict/", response_model=TextResponse, summary="Получение вердикта")
 async def get_verdict(request: TextStatusRequest):
-    """
-    Возвращает вердикт.
-    - **id**: Уникальный числовой идентификатор (больше 0)
-    """
-    pass
+    try:
+        verdict = cache.get(request.id)
+        if not verdict:
+            return Error(error_message="Verdict not ready yet / Incorrect id")
+        else: 
+            return verdict
+    except Exception as e:
+        return Error(error_message=str(e))
 
 @app.get("/")
 async def root():
@@ -42,6 +56,6 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-def start(host: str, port: int):
+def start():
     uvicorn.run(app, host="localhost", port=8000)
 
