@@ -3,7 +3,7 @@ from typing import Optional
 from redis import Redis
 
 from pydantic_core import from_json
-from module_api import TextRequest
+from models import TextRequest
 
 class QueueWorker:
     def __init__(self, 
@@ -25,7 +25,7 @@ class QueueWorker:
         item_json = item.model_dump_json()
         return self.redis.rpush(self.queue_name, item_json) > 0
     
-    def pop(self) -> Optional[str]:
+    def pop(self) -> TextRequest:
         json = self.redis.lpop(self.queue_name)
         return TextRequest(**from_json(json))
     

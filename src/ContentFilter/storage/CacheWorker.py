@@ -1,4 +1,4 @@
-from module_api import TextResponse
+from models import TextResponse
 from pydantic_core import from_json
 
 from redis import Redis

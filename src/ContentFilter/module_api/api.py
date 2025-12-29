@@ -1,12 +1,8 @@
 from fastapi import FastAPI
 import uvicorn
 
-from module_api.models import TextStatusRequest
-from module_api.models import TextStatusResponse
-from module_api.models import TextRequest
-from module_api.models import TextResponse
-from module_api.models import Error
-from storage import *
+from models import TextStatusRequest, TextStatusResponse, TextRequest, TextResponse, Error
+from storage import QueueWorker, CacheWorker
 from env import Settings
 
 app = FastAPI(title="MIN Messager API", version="1.0.0")
