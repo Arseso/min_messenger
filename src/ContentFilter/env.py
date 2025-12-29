@@ -16,11 +16,9 @@ class Settings:
     # redis settings
     REDIS_HOST: str = os.getenv("REDIS_HOST")
     REDIS_PORT: int = int(os.getenv("REDIS_PORT"))
-    REDIS_USR: str = os.getenv("REDIS_USR")
     REDIS_PWD: str = os.getenv("REDIS_PWD")
-    
-    # rabbitmq settings
-    RABBITMQ_HOST: str  = os.getenv("RABBITMQ_HOST")
-    RABBITMQ_PORT: int = int(os.getenv("RABBITMQ_PORT"))
-    RABBITMQ_USR: str = os.getenv("RABBITMQ_USR")
-    RABBITMQ_PWD: str = os.getenv("RABBITMQ_PWD")
+
+
+if __name__ == "__main__":
+    print(Settings.SERVER_HOST)
+    print(Settings.SERVER_PORT)
