@@ -2,9 +2,6 @@
 
 # Виртуальные окружения
 .venv/
-venv/
-env/
-ENV/
 
 # Файлы Python
 __pycache__/
