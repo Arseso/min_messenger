@@ -10,7 +10,7 @@ class QueueWorker:
                  host: str = "localhost",
                  port: int = 6379,
                  password: str = "",
-                 db: int = 0,
+                 db: int = 1,
                  queue_name: str = "string_queue"):
         self.redis = Redis(
             host=host,
