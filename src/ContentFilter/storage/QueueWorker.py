@@ -5,6 +5,8 @@ from redis import Redis
 from pydantic_core import from_json
 from models import TextRequest
 
+import logging
+
 class QueueWorker:
     def __init__(self, 
                  host: str = "localhost",
@@ -19,6 +21,11 @@ class QueueWorker:
             db=db,
             decode_responses=True
         )
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(threadName)s - %(message)s'
+        )
+        logging.info("QueueWorker connected to Redis")
         self.queue_name = queue_name
     
     def append(self, item: TextRequest) -> bool:
