@@ -53,5 +53,5 @@ async def health_check():
     return {"status": "healthy"}
 
 def start():
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host=Settings.SERVER_HOST, port=Settings.SERVER_PORT)
 
