@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 import torch
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassification
 from typing import Dict, Any
@@ -26,7 +27,11 @@ class NeuralNet:
             )
             self.model.eval()
             self._model_loaded = True
-            print(f"✅ Модель загружена: {model_repo}")
+            logging.basicConfig(
+                level=logging.INFO,
+                format='%(asctime)s - %(threadName)s - %(message)s'
+            )
+            logging.info(f"Model successfully downloaded from {model_repo}")
             
         except Exception as e:
             print(f"⚠️  Не удалось загрузить модель: {e}")

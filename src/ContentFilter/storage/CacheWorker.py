@@ -2,6 +2,7 @@ from models import TextResponse
 from pydantic_core import from_json
 
 from redis import Redis
+import logging
 
 
 class CacheWorker:
@@ -12,6 +13,12 @@ class CacheWorker:
             password=redis_pwd,
             db= 0
         )
+
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(threadName)s - %(message)s'
+        )
+        logging.info("CacheWorker connected to Redis")
         
     def append(self, obj: TextResponse):
         status = self.redis.append(obj.id, obj.model_dump_json())
