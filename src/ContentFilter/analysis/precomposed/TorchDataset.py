@@ -32,6 +32,7 @@ class TorchDataset(Dataset):
         return input_ids, labels_tensor
 
     def precomposition(self, text: str) -> torch.Tensor:
+        text = text.lower().replace(" ", "")
         encoded = self.tok.encode(text, return_tensors="pt").squeeze()
         padding_needed = self.context - len(encoded)
         
