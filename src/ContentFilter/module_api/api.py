@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import FastAPI
 import uvicorn
 
@@ -10,7 +11,7 @@ queue = QueueWorker(Settings.REDIS_HOST, Settings.REDIS_PORT, Settings.REDIS_PWD
 cache = CacheWorker(Settings.REDIS_HOST, Settings.REDIS_PORT, Settings.REDIS_PWD)
 
 
-@app.post("/check/", summary="Отправка сообщения на проверку")
+@app.post("/check/", summary="Отправка сообщения на проверку", response_model=Union[TextStatusResponse, Error])
 async def process_text(request: TextRequest):
     try:
         if not queue.append(request):
@@ -21,7 +22,7 @@ async def process_text(request: TextRequest):
         return Error(error_message=str(e))
     
 
-@app.get("/status/", response_model=TextStatusResponse, summary="Проверка статуса работы над сообщением")
+@app.get("/status/", response_model=Union[TextStatusResponse, Error], summary="Проверка статуса работы над сообщением")
 async def get_status(request: TextStatusRequest):
     try:
         status = ""
@@ -33,7 +34,7 @@ async def get_status(request: TextStatusRequest):
     except Exception as e:
         return Error(error_message=str(e))
 
-@app.get("/verdict/", response_model=TextResponse, summary="Получение вердикта")
+@app.get("/verdict/", response_model=Union[TextResponse, Error], summary="Получение вердикта")
 async def get_verdict(request: TextStatusRequest):
     try:
         verdict = cache.get(request.id)
