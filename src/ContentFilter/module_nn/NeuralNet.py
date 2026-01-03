@@ -67,7 +67,7 @@ class NeuralNet:
                 probabilities = torch.nn.functional.softmax(logits, dim=-1)
                 probs = probabilities.cpu().numpy()[0]
                 
-                if np.max(probs) < 1:
+                if np.max(probs) < 0.9:
                     return Verdict.OK
                 
                 predicted_label = int(np.argmax(probs))
