@@ -13,18 +13,13 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: messenger
-          MYSQL_SSL: "0"
-        ports:
-          - "3306:3306"
+        ports: [ "3306:3306" ]
         options: >-
-          --health-cmd=mysqladmin ping -h localhost -u root -ptest
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-          --default-authentication-plugin=mysql_native_password
+          --health-cmd="mysqladmin ping -h localhost -u root -ptest"
+          --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Checkout PR head
+      - name: Checkout PR head (e.g. tests/report)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
