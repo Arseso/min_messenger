@@ -9,16 +9,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout tests/report (for test scripts)
+      - name: Checkout tests/report
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
-      - name: Fetch release/1.0.1-content-filter (for services)
+      - name: Fetch release branch
         run: |
-          git fetch origin release/1.0.1-content-filter
-          git worktree add -B release-1.0.1-content-filter origin/release/1.0.1-content-filter
+          git fetch origin release/1.0.1-content-filter:release/1.0.1-content-filter
+          git worktree add -B release-cf release/1.0.1-content-filter
+          echo "✅ Worktree created"
+          ls -la release-cf/src/ContentFilter/
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,15 +32,14 @@ jobs:
 
       - name: Start services
         run: |
-          cd release-1.0.1-content-filter/src/ContentFilter
+          cd release-cf/src/ContentFilter
           docker compose -f docker-compose.yaml up -d
-          echo "✅ Services started"
 
       - name: Wait for content-filter
         run: |
           timeout 60s bash -c '
             while ! curl -sf http://localhost:8000/status >/dev/null 2>&1; do
-              echo "⏳ Waiting for content-filter (http://localhost:8000/status)..."
+              echo "⏳ Waiting for content-filter..."
               sleep 2
             done
             echo "✅ content-filter is ready"
@@ -58,6 +59,5 @@ jobs:
       - name: Stop services
         if: always()
         run: |
-          cd release-1.0.1-content-filter/src/ContentFilter
+          cd release-cf/src/ContentFilter
           docker compose -f docker-compose.yaml down -v || true
-          echo "✅ Services stopped"
