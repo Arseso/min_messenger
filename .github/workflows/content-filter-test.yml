@@ -1,0 +1,63 @@
+name: ContentFilter Tests
+
+on:
+  pull_request:
+    branches: [ ci ]
+
+jobs:
+  test-content-filter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tests/report (for test scripts)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Fetch release/1.0.1-content-filter (for services)
+        run: |
+          git fetch origin release/1.0.1-content-filter
+          git worktree add -B release-1.0.1-content-filter origin/release/1.0.1-content-filter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install requests redis
+
+      - name: Start services
+        run: |
+          cd release-1.0.1-content-filter/src/ContentFilter
+          docker compose -f docker-compose.yaml up -d
+          echo "✅ Services started"
+
+      - name: Wait for content-filter
+        run: |
+          timeout 60s bash -c '
+            while ! curl -sf http://localhost:8000/status >/dev/null 2>&1; do
+              echo "⏳ Waiting for content-filter (http://localhost:8000/status)..."
+              sleep 2
+            done
+            echo "✅ content-filter is ready"
+          '
+
+      - name: Run API functional tests
+        run: |
+          cd tests/content_filter/api_functional
+          chmod +x run_api_tests.sh
+          ./run_api_tests.sh
+
+      - name: Run model logic tests
+        run: |
+          cd tests/content_filter/model_logic
+          python run_model_tests.py
+
+      - name: Stop services
+        if: always()
+        run: |
+          cd release-1.0.1-content-filter/src/ContentFilter
+          docker compose -f docker-compose.yaml down -v || true
+          echo "✅ Services stopped"
