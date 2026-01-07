@@ -15,11 +15,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
-      - name: Fetch release branch
+      - name: Fetch and create worktree from origin/release/1.0.1-content-filter
         run: |
-          git fetch origin release/1.0.1-content-filter:release/1.0.1-content-filter
-          git worktree add -B release-cf release/1.0.1-content-filter
-          echo "✅ Worktree created"
+          git fetch origin release/1.0.1-content-filter
+          git worktree add release-cf origin/release/1.0.1-content-filter
+          echo "✅ Worktree created at release-cf/"
+          ls -la release-cf/
+          echo "=== src/ContentFilter contents ==="
           ls -la release-cf/src/ContentFilter/
 
       - name: Set up Python
@@ -39,7 +41,7 @@ jobs:
         run: |
           timeout 60s bash -c '
             while ! curl -sf http://localhost:8000/status >/dev/null 2>&1; do
-              echo "⏳ Waiting for content-filter..."
+              echo "⏳ Waiting for content-filter (http://localhost:8000/status)..."
               sleep 2
             done
             echo "✅ content-filter is ready"
@@ -61,3 +63,4 @@ jobs:
         run: |
           cd release-cf/src/ContentFilter
           docker compose -f docker-compose.yaml down -v || true
+          echo "✅ Services stopped"
