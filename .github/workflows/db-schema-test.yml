@@ -1,0 +1,46 @@
+name: DB Schema Test
+
+on:
+  pull_request:
+    branches: [ ci ]
+
+jobs:
+  test-db-schema:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test
+          MYSQL_DATABASE: messenger
+        ports: [ "3306:3306" ]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -ptest"
+          --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout PR head (e.g. tests/report)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Fetch schema from feature/db-schema
+        run: |
+          git fetch origin feature/db-schema
+          mkdir -p tests/db_schema
+          git show origin/feature/db-schema:src/db-schema/messenger.sql > tests/db_schema/schema.sql
+
+      - name: Wait for MySQL
+        run: timeout 30s bash -c 'until mysql -h 127.0.0.1 -u root -ptest -e "SELECT 1"; do sleep 2; done'
+
+      - name: Run DB tests
+        run: |
+          mysql -h 127.0.0.1 -u root -ptest < tests/db_schema/schema.sql
+          mysql -h 127.0.0.1 -u root -ptest < tests/db_schema/test_db_structure.sql > output.txt
+          cat output.txt
+          if grep -q "^[[:space:]]*0" output.txt; then
+            echo "::error::❌ DB schema test failed"
+            exit 1
+          fi
+          echo "✅ DB schema tests passed"
