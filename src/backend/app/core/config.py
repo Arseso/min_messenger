@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+if not load_dotenv():
+    raise ValueError(".env file didn't loaded")
 
 db_config = {
     'host': os.getenv('DB_HOST', '127.0.0.1'),
