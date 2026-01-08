@@ -18,11 +18,15 @@ def get_messages(chat_id: int, conn = Depends(get_db_connection)):
 @router.post("/messages/send")
 async def send_msg(msg_data: MessageCreate, conn = Depends(get_db_connection)):
     try:
-        msg_id = await crud_message.create_message(conn, msg_data)
         crud_chat.update_last_message_time(conn, msg_data.chat_id)
+
+        msg_id = await crud_message.create_message(conn, msg_data)
+
         return {"status": "ok", "message_id": msg_id}
+
     except Exception as e:
         print(f"Error sending message: {e}")
+        conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload/message_image")

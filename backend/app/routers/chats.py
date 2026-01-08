@@ -5,6 +5,7 @@ from app.core.socket_manager import manager
 from app.core.database import get_db_connection
 from app.crud import chat as crud_chat
 from app.crud import message as crud_message
+from contextlib import closing
 
 router = APIRouter(tags=["Chats"])
 
@@ -67,7 +68,9 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: int):
 
 @router.websocket("/ws/notifications/{user_id}")
 async def notifications_endpoint(websocket: WebSocket, user_id: int):
-    conn = get_db_connection()
+    db_gen = get_db_connection()
+    conn = next(db_gen)
+
     await manager.connect_notifications(websocket, user_id)
 
     try:
@@ -77,5 +80,10 @@ async def notifications_endpoint(websocket: WebSocket, user_id: int):
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect_notifications(websocket, user_id)
+    except Exception as e:
+        print(f"WS Error: {e}")
     finally:
-        conn.close()
+        try:
+            next(db_gen)
+        except StopIteration:
+            pass

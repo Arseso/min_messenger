@@ -16,9 +16,8 @@ def get_messages_by_chat(conn, chat_id: int):
     return cursor.fetchall()
 
 async def create_message(conn, msg_data: MessageCreate):
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
-    # 1. Сохраняем в БД (по умолчанию 'sent')
     cursor.execute(
         "INSERT INTO messages (sender_id, chat_id, content) VALUES (%s, %s, %s)",
         (msg_data.sender_id, msg_data.chat_id, msg_data.content)
@@ -26,36 +25,42 @@ async def create_message(conn, msg_data: MessageCreate):
     message_id = cursor.lastrowid
     conn.commit()
 
-    # 2. Проверяем, онлайн ли кто-то из участников (кроме отправителя)
+    cursor.execute(
+        "SELECT username, avatar_url FROM users WHERE user_id = %s",
+        (msg_data.sender_id,)
+    )
+    sender_info = cursor.fetchone()
+
     participant_ids = crud_chat.get_participant_ids(conn, msg_data.chat_id)
     is_anyone_online = False
 
     for u_id in participant_ids:
         if u_id != msg_data.sender_id:
-            # Проверяем наличие в user_notifications (сокет уведомлений)
             if u_id in manager.user_notifications and manager.user_notifications[u_id]:
                 is_anyone_online = True
                 break
 
-    # 3. Определяем итоговый статус для рассылки
     final_status = "delivered" if is_anyone_online else "sent"
 
-    # 4. Если онлайн, обновляем в БД сразу
     if is_anyone_online:
         cursor.execute("UPDATE messages SET status = 'delivered' WHERE message_id = %s", (message_id,))
         conn.commit()
 
-    # 5. ОТПРАВЛЯЕМ ОДИН РАЗ всем участникам чата
     broadcast_data = {
         "type": "new_message",
         "message_id": message_id,
         "sender_id": msg_data.sender_id,
         "chat_id": msg_data.chat_id,
         "content": msg_data.content,
-        "status": final_status, # Сразу правильный статус!
-        "created_at": str(datetime.now())
+        "status": final_status,
+        "created_at": str(datetime.now()),
+        "sender_name": sender_info.get('username', "Пользователь"),
+        "sender_avatar": sender_info.get('avatar_url', None),
     }
     await manager.broadcast(broadcast_data, msg_data.chat_id)
+
+    for p_id in participant_ids:
+        await manager.notify_user(p_id, broadcast_data)
 
     return message_id
 
@@ -82,7 +87,6 @@ def mark_messages_as_read(conn, chat_id: int, user_id: int):
 async def mark_undelivered_as_delivered(conn, user_id: int):
     cursor = conn.cursor(dictionary=True)
     try:
-        # Ищем чужие сообщения в моих чатах, которые еще не 'delivered'
         query = """
             SELECT m.message_id, m.chat_id, m.sender_id
             FROM messages m
@@ -98,7 +102,6 @@ async def mark_undelivered_as_delivered(conn, user_id: int):
             cursor.execute("UPDATE messages SET status = 'delivered' WHERE message_id = %s", (msg['message_id'],))
             conn.commit()
 
-            # Уведомляем чат, что сообщение доставлено
             await manager.broadcast({
                 "type": "message_status_update",
                 "message_id": msg['message_id'],
