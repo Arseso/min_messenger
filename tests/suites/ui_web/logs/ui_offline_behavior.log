@@ -1,0 +1,4 @@
+ClientException: Failed to fetch, uri=http://localhost:8000/messages/send
+ClientException: Failed to fetch, uri=http://localhost:8000/chats/4
+
+WebSocketChannelException: WebSocketException: Failed to connect WebSocket

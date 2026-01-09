@@ -1,0 +1,63 @@
+
+services:
+  redis:
+    image: redis:8.4-alpine
+    container_name: redis
+    hostname: ${REDIS_HOST}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PWD}
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: ["redis-server", "--requirepass", "${REDIS_PWD}", "--appendonly", "yes"] 
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PWD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - content-filter-private
+
+  content-filter:
+    image: content-filter:latest
+    container_name: content-filter
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - content-filter-private
+
+volumes:
+  redis_data:
+
+networks:
+  content-filter-private:
+    driver: bridge

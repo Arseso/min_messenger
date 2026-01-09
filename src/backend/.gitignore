@@ -1,4 +1,2 @@
-*.csv
-*.pth
 *.pycache
 __pycache__

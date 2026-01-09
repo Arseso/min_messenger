@@ -1,0 +1,25 @@
+$ curl -s -X POST http://127.0.0.1:8000/register -H "Content-Type: application/json" -d '{"username":"smoke_user","password":"pass123"}'
+{"status":"ok"}
+
+$ curl -s -X POST http://127.0.0.1:8000/login -H "Content-Type: application/json" -d '{"username":"smoke_user","password":"pass123"}'
+{"username":"smoke_user","user_id":1,"avatar_url":null}
+
+$ curl -s -X POST http://127.0.0.1:8000/chats/create -H "Content-Type: application/json" -d '{"name":"Smoke Test Chat","is_group":true,"created_by":1,"participant_ids":[1]}'
+{"chat_id":1}
+
+$ curl -s -X POST http://127.0.0.1:8000/messages/send -H "Content-Type: application/json" -d '{"sender_id":1,"chat_id":1,"content":"<script>alert(1)</script>"}'
+{"status":"ok","message_id":1}
+→ Проверка в БД: SELECT content FROM messages WHERE message_id = 1;
+   content = '<script>alert(1)</script>' → сохранён как есть, без санитизации.
+
+$ curl -s -X POST http://127.0.0.1:8000/messages/send -H "Content-Type: application/json" -d '{"sender_id":1,"chat_id":1,"content":""}'
+{"status":"ok","message_id":2}
+→ Пустое сообщение принято системой.
+
+$ curl -s -X POST http://127.0.0.1:8000/messages/send -H "Content-Type: application/json" -d '{"sender_id":999,"chat_id":1,"content":"test"}'
+{"detail":"(MySQLdb.IntegrityError) (1452, 'Cannot add or update a child row: a foreign key constraint fails (`messenger`.`messages`, CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`))')"}
+→ Ошибка 500 + раскрытие структуры БД.
+
+$ python -c "print('A' * 10000)" > long.txt
+$ curl -s -X POST http://127.0.0.1:8000/messages/send -H "Content-Type: application/json" --data-binary "@long.txt" -d "{\"sender_id\":1,\"chat_id\":1,\"content\":\"$(cat long.txt)\"}"
+{"status":"ok","message_id":4}

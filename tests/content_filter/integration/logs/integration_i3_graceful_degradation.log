@@ -1,0 +1,28 @@
+$ docker exec -it redis redis-cli -a admin123 FLUSHDB
+OK
+
+$ curl -s -X POST http://localhost:8000/check/ -H "Content-Type: application/json" -d '{"id":"i3_test","text":"during worker test"}'
+{"id":"i3_test","status":"working"}
+
+$ docker exec -it redis redis-cli -a admin123 KEYS "*"
+1) "i3_test"
+
+$ curl -s http://localhost:8000/health
+{"status":"healthy"}
+
+$ curl -s -X POST http://localhost:8000/check/ -H "Content-Type: application/json" -d '{"id":"i3_new","text":"after fake kill"}'
+{"id":"i3_new","status":"working"}
+
+$ sleep 15
+
+$ curl -s -X GET http://localhost:8000/status/ -H "Content-Type: application/json" -d '{"id":"i3_test"}'
+{"id":"i3_test","status":"ready"}
+
+$ curl -s -X GET http://localhost:8000/status/ -H "Content-Type: application/json" -d '{"id":"i3_new"}'
+{"id":"i3_new","status":"ready"}
+
+$ curl -s -X GET http://localhost:8000/verdict/ -H "Content-Type: application/json" -d '{"id":"i3_new"}'
+{"id":"i3_new","verdict":"SPAM"}
+
+$ curl -s -X GET http://localhost:8000/verdict/ -H "Content-Type: application/json" -d '{"id":"i3_test"}'
+{"id":"i3_test","verdict":"OK"}
